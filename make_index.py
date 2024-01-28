@@ -1,9 +1,10 @@
 """ Build index from directory listing
-stolen from https://stackoverflow.com/questions/39048654/how-to-enable-directory-indexing-on-github-pages
+stolen from https://stackoverflow.com/questions/39048654/how-to-enable-directory-indexing-on-github-pages and modified
 
 make_index.py </path/to/directory> [--header <header text>]
 
 Usage: run with </path/to/directory> equal to "whatever/root/files" with no closing slash. Don't run on root directory!
+Use also flag --header "steinbergereriksson.se/files/ for nicer look
 """
 from __future__ import print_function
 import os.path, time
@@ -79,7 +80,7 @@ import argparse
 # May need to do "pip install mako"
 from mako.template import Template
 
-def fun(dir,rootdir):
+def fun(dir,rootdir, header = dir):
     print('Processing: '+dir)
     filenames = [fname for fname in sorted(os.listdir(dir))
               if fname not in EXCLUDED and os.path.isfile(dir+fname)]
@@ -88,11 +89,15 @@ def fun(dir,rootdir):
     dirnames = [fname for fname in dirnames if fname not in filenames]
 #    header = os.path.basename(dir)
     f = open(dir+'/index.html','w')
-    print(Template(INDEX_TEMPLATE).render(dirnames=dirnames,filenames=filenames, header=dir,ROOTDIR=rootdir,time=time.ctime(os.path.getctime(dir))),file=f)
+    print("Header (dir) is")
+    print(dir)
+    print("actual header is")
+    print(header)
+    print(Template(INDEX_TEMPLATE).render(dirnames=dirnames,filenames=filenames, header=header,ROOTDIR=rootdir,time=time.ctime(os.path.getctime(dir))),file=f)
     f.close()
     for subdir in dirnames:
         try:
-            fun(dir+subdir+"/",rootdir+'../')
+            fun(dir+subdir+"/",rootdir+'../', header+subdir+"/")
         except:
             pass
 
@@ -101,7 +106,8 @@ def main():
     parser.add_argument("directory")
     parser.add_argument("--header")
     args = parser.parse_args()
-    fun(args.directory+'/','../')
+    print(args)
+    fun(args.directory+'/','../', args.header)
 
 if __name__ == '__main__':
     main()
